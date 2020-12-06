@@ -21,8 +21,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/pdf/', (req, res) => {
+
   let options = { format: 'A4' };
-  var content = fs.readFileSync('Output.html', 'utf8');
+  var content = req.body || fs.readFileSync('Output.html', 'utf8');
   // var content = "<p>xd</p>";
   let file = { content: content };
   html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
