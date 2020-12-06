@@ -1,3 +1,4 @@
+const express = require('express')
 var html_to_pdf = require('html-pdf-node');
 // var fs = require('fs')
 // let options = { format: 'A4' };
@@ -11,7 +12,7 @@ var html_to_pdf = require('html-pdf-node');
 //   fs.writeFileSync('some.pdf', pdfBuffer);
 // });
 
-const express = require('express')
+
 const app = express()
 const port = 3000
 
