@@ -10,6 +10,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "html-pdf-node": "^1.0.5"
+  },
   "devDependencies": {
     "express": "^4.17.1",
     "html-pdf-node": "^1.0.5"
