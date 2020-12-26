@@ -1,11 +1,13 @@
-const express = require("express");
+import PaperFormats from "./PaperFormats";
+import express from "express";
 const html_to_pdf = require("html-pdf-node");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const yup = require("yup");
-const PaperFormats = require("./PaperFormats");
+// const PaperFormats = require("./PaperFormats");
 const app = express();
 const port = process.env.PORT || 3000;
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -28,6 +30,12 @@ const pdfGeneratorSchema = yup.object().shape({
   })
 });
 
+const check = async () => {
+  return pdfGeneratorSchema.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true
+  });
+};
 app.get("/pdf/", bodyParser.json(), (req, res) => {
   let options = { format: "A4" };
   console.log("req", req);
@@ -40,36 +48,33 @@ app.get("/pdf/", bodyParser.json(), (req, res) => {
   });
 });
 
-app.get("/pdftest/", bodyParser.json(), (req, res) => {
-  let options = { format: "A4" };
-  console.log("req", req);
+app.get("/pdftest/", bodyParser.json(), async (req, res) => {
+  // let options = { format: "A4" };
+  // console.log("req", req);
   console.log("req body", req.body);
-  if (!!req.body)
+  if (!req.body)
     res
       .status(400)
       .send("Missing json!!! Remember to set Content-Type:application/json!!!");
-  try {
-    const validatedValues = await async ()=> {pdfGeneratorSchema.validate(req.body, {
+  let validatedValues = null;
+  validatedValues = await pdfGeneratorSchema
+    .validate(req.body, {
       abortEarly: false,
       stripUnknown: true
-    })};
-    console.log("validated",validatedValues)
-    const file = { content: validatedValues.content};
-    const options= validatedValues.options
-    html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
-      res.contentType("application/pdf");
-      res.send(pdfBuffer);
+    })
+    .catch(e => {
+      console.log(e);
+      res.status(400).send(e.errors);
     });
-  } catch (e) {
-    console.log(e);
-    res.status(400).send(e.errors);
-  }
-  // const content = req.body.content || res.status(400).send("missing html code")
-  // let file = { content: content };
-  // html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
-  //   res.contentType("application/pdf");
-  //   res.send(pdfBuffer);
-  // });
+  console.log(validatedValues)
+  const {options} = validatedValues
+  console.log('options',options)
+  const content = validatedValues.content;
+  let file = { content: content };
+  html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
+    res.contentType("application/pdf");
+    res.send(pdfBuffer);
+  });
 });
 
 app.listen(port, () => {
